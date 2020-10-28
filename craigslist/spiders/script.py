@@ -13,14 +13,18 @@ class DmozItem(scrapy.Item):
 	Link = scrapy.Field()
 class DmozSpider(scrapy.Spider):
 	name = "craig"
-	page_numbers = 2
+	page_numbers = 0
 	start_urls = [
-	'https://losangeles.craigslist.org/d/software-qa-dba-etc/search/sof'
+	'https://losangeles.craigslist.org/d/retail-wholesale/search/ret?s=0'
 	]
 	def parse(self, response):
 		links = response.css('a.result-title').xpath("@href").extract()
 		for link in links:
 			yield scrapy.Request(link, callback=self.parse_attr)
+		next_page = "https://losangeles.craigslist.org/d/retail-wholesale/search/ret?s="+str(DmozSpider.page_numbers)
+		if DmozSpider.page_numbers<=1000:
+			DmozSpider.page_numbers +=120
+			yield response.follow(next_page,callback=self.parse)
 
 	def parse_attr(self, response):
 		item = DmozItem()
@@ -33,6 +37,8 @@ class DmozSpider(scrapy.Spider):
 		Employment_type = ll[1]
 
 		Address = response.css('div.mapaddress::text').extract()
+		Location[0] = Location[0].replace(" (","")
+		Location[0] = Location[0].replace(")","")
 		Description = response.xpath("//section[@id='postingbody']/descendant::text()").extract()
 		res=[]
 		
