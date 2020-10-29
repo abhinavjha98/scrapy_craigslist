@@ -2,6 +2,8 @@ import scrapy
 import urllib
 import requests
 import re
+from selenium import webdriver
+
 
 class DmozItem(scrapy.Item):
 	Location = scrapy.Field()
@@ -11,12 +13,15 @@ class DmozItem(scrapy.Item):
 	Compensation = scrapy.Field()
 	Employment_type = scrapy.Field()
 	Link = scrapy.Field()
+	Email = scrapy.Field()
 class DmozSpider(scrapy.Spider):
 	name = "craig"
 	page_numbers = 0
 	start_urls = [
 	'https://losangeles.craigslist.org/d/retail-wholesale/search/ret?s=0'
 	]
+	def __init__(self):
+		self.driver = webdriver.Chrome('E:/PROJECT/scrapy_python/craigslist/craigslist/craigslist/spiders/chromedriver.exe')
 	def parse(self, response):
 		links = response.css('a.result-title').xpath("@href").extract()
 		for link in links:
@@ -27,6 +32,10 @@ class DmozSpider(scrapy.Spider):
 			yield response.follow(next_page,callback=self.parse)
 
 	def parse_attr(self, response):
+		self.driver.get(response.url)
+		next = self.driver.find_elements_by_css_selector("button.reply-button")
+		next[0].click()
+		
 		item = DmozItem()
 		Link = response.url
 		Title = response.css('h1 span span::text').extract()
@@ -35,7 +44,7 @@ class DmozSpider(scrapy.Spider):
 		ll = response.css('p span b::text').extract()
 		Compensation = ll[0]
 		Employment_type = ll[1]
-
+		Email = response.css('a.mailapp::text').extract()
 		Address = response.css('div.mapaddress::text').extract()
 		Location[0] = Location[0].replace(" (","")
 		Location[0] = Location[0].replace(")","")
@@ -68,5 +77,6 @@ class DmozSpider(scrapy.Spider):
 		item['Address'] = Location
 		item['Description'] = text_list
 		item['Link'] = Link
+		item['Email'] = Email
 		return item
 	
