@@ -20,4 +20,6 @@ class DmozSpider(scrapy.Spider):
 		self.driver.get(response.url)
 		next = self.driver.find_elements_by_css_selector("button.reply-button")
 		next[0].click()
-		print(response.css('div.reply-info::text').extract())
+		elems = self.driver.find_elements_by_xpath("//a[@href]")
+		for elem in elems:
+			print(elem.get_attribute("href"))
