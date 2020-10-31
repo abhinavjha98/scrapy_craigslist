@@ -3,6 +3,7 @@ import urllib
 import requests
 import re
 from selenium import webdriver
+import time
 
 class DmozItem(scrapy.Item):
 	Location = scrapy.Field()
@@ -20,6 +21,7 @@ class DmozSpider(scrapy.Spider):
 		self.driver.get(response.url)
 		next = self.driver.find_elements_by_css_selector("button.reply-button")
 		next[0].click()
-		elems = self.driver.find_elements_by_xpath("//a[@href]")
-		for elem in elems:
-			print(elem.get_attribute("href"))
+		time.sleep(5)
+		aa = self.driver.find_element_by_css_selector("a.mailapp")
+		print(aa.text)
+		

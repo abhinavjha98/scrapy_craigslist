@@ -3,7 +3,8 @@ import urllib
 import requests
 import re
 from selenium import webdriver
-
+import time
+from selenium.common.exceptions import NoSuchElementException
 
 class DmozItem(scrapy.Item):
 	Location = scrapy.Field()
@@ -14,6 +15,8 @@ class DmozItem(scrapy.Item):
 	Employment_type = scrapy.Field()
 	Link = scrapy.Field()
 	Email = scrapy.Field()
+	Name = scrapy.Field()
+	Email = scrapy.Field()
 class DmozSpider(scrapy.Spider):
 	name = "craig"
 	page_numbers = 0
@@ -21,7 +24,7 @@ class DmozSpider(scrapy.Spider):
 	'https://losangeles.craigslist.org/d/retail-wholesale/search/ret?s=0'
 	]
 	def __init__(self):
-		self.driver = webdriver.Chrome('E:/PROJECT/scrapy_python/craigslist/craigslist/craigslist/spiders/chromedriver.exe')
+		self.driver = webdriver.Chrome('E:/PROJECT/scrapy_python/craigslist/craigslist/chromedriver.exe')
 	def parse(self, response):
 		links = response.css('a.result-title').xpath("@href").extract()
 		for link in links:
@@ -33,10 +36,28 @@ class DmozSpider(scrapy.Spider):
 
 	def parse_attr(self, response):
 		self.driver.get(response.url)
-		next = self.driver.find_elements_by_css_selector("button.reply-button")
-		next[0].click()
-		
+		try:
+			next = self.driver.find_elements_by_css_selector("button.reply-button")
+			next[0].click()
+			time.sleep(2)
+		except NoSuchElementException:
+			next=""
+
 		item = DmozItem()
+
+		try:
+			next1 = self.driver.find_element_by_css_selector("div aside ul li p")
+			Name = next1.text
+		except NoSuchElementException:
+			Name = ""
+
+		try:
+			next2 = self.driver.find_element_by_css_selector("a.mailapp")
+			Email = next2.text
+		except NoSuchElementException:
+			Email = ""
+		if "@" in Name:
+			Name=""	
 		Link = response.url
 		Title = response.css('h1 span span::text').extract()
 		Location = response.css('h1 span small::text').extract()
@@ -44,7 +65,6 @@ class DmozSpider(scrapy.Spider):
 		ll = response.css('p span b::text').extract()
 		Compensation = ll[0]
 		Employment_type = ll[1]
-		Email = response.css('a.mailapp::text').extract()
 		Address = response.css('div.mapaddress::text').extract()
 		Location[0] = Location[0].replace(" (","")
 		Location[0] = Location[0].replace(")","")
@@ -69,7 +89,7 @@ class DmozSpider(scrapy.Spider):
 		# 	text = text.rstrip("\n")
 		# 	text_list=text_list+text
 		# text_list = text_list.rstrip("\n")
-		
+		item['Name'] = Name
 		item['Title'] = Title
 		item['Location'] = Address
 		item['Compensation'] = Compensation
