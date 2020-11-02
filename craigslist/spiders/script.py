@@ -30,8 +30,8 @@ class DmozSpider(scrapy.Spider):
 		for link in links:
 			yield scrapy.Request(link, callback=self.parse_attr)
 		next_page = "https://losangeles.craigslist.org/d/retail-wholesale/search/ret?s="+str(DmozSpider.page_numbers)
-		if DmozSpider.page_numbers<=1000:
-			DmozSpider.page_numbers +=120
+		if DmozSpider.page_numbers<=500:
+			DmozSpider.page_numbers +=120+
 			yield response.follow(next_page,callback=self.parse)
 
 	def parse_attr(self, response):
