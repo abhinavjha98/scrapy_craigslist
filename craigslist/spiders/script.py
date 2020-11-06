@@ -21,8 +21,6 @@ class DmozSpider(scrapy.Spider):
 	start_urls = [
 	'https://minneapolis.craigslist.org/d/services/search/bbb'
 	]
-	def __init__(self):
-		self.driver = webdriver.Chrome('E:/PROJECT/scrapy_python/craigslist/craigslist/chromedriver.exe')
 	def parse(self, response):
 		links = response.css('a.result-title').xpath("@href").extract()
 		for link in links:
