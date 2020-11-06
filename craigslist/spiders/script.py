@@ -14,9 +14,6 @@ class DmozItem(scrapy.Item):
 	Compensation = scrapy.Field()
 	Employment_type = scrapy.Field()
 	Link = scrapy.Field()
-	Email = scrapy.Field()
-	Name = scrapy.Field()
-	Email = scrapy.Field()
 class DmozSpider(scrapy.Spider):
 	name = "craig"
 	page_numbers = 120
@@ -29,10 +26,6 @@ class DmozSpider(scrapy.Spider):
 		links = response.css('a.result-title').xpath("@href").extract()
 		for link in links:
 			yield scrapy.Request(link, callback=self.parse_attr)
-		# next_page = "https://minneapolis.craigslist.org/search/bbb?s="+str(DmozSpider.page_numbers)
-		# if DmozSpider.page_numbers<=6000:
-		# 	DmozSpider.page_numbers +=120
-		# 	yield response.follow(next_page,callback=self.parse)
 		next_page = response.css('a.button.next').xpath("@href").extract()
 		if next_page:
 			next_href = next_page[0]
@@ -100,11 +93,6 @@ class DmozSpider(scrapy.Spider):
 		for text in res:
 			text = text.replace(",","")
 			text_list = text_list+text
-		# for text in Description:
-		# 	text = text.rstrip("\n")
-		# 	text_list=text_list+text
-		# text_list = text_list.rstrip("\n")
-		item['Name'] = ""
 		item['Title'] = Title
 		item['Location'] = Address
 		item['Compensation'] = Compensation
@@ -112,6 +100,5 @@ class DmozSpider(scrapy.Spider):
 		item['Address'] = Location
 		item['Description'] = text_list
 		item['Link'] = Link
-		item['Email'] = ""
 		return item
 	
