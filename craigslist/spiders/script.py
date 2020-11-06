@@ -14,6 +14,7 @@ class DmozItem(scrapy.Item):
 	Compensation = scrapy.Field()
 	Employment_type = scrapy.Field()
 	Link = scrapy.Field()
+
 class DmozSpider(scrapy.Spider):
 	name = "craig"
 	page_numbers = 120
@@ -41,9 +42,6 @@ class DmozSpider(scrapy.Spider):
 		# 	time.sleep(2)
 		# except NoSuchElementException:
 		# 	next=""
-
-		item = DmozItem()
-
 		# try:
 		# 	next1 = self.driver.find_element_by_css_selector("div aside ul li p")
 		# 	Name = next1.text
@@ -57,6 +55,7 @@ class DmozSpider(scrapy.Spider):
 		# 	Email = ""
 		# if "@" in Name:
 		# 	Name=""	
+		item = DmozItem()
 		Link = response.url
 		Title = response.css('h1 span span::text').extract()
 		Location = response.css('h1 span small::text').extract()
@@ -85,7 +84,7 @@ class DmozSpider(scrapy.Spider):
 		Description[3] = ""
 		Description[4] = ""
 		Description[5] = ""
-		# Description[6] = ""
+		
 		for sub in Description: 
 			res.append(re.sub('\n', '', sub))
 		print(res)
