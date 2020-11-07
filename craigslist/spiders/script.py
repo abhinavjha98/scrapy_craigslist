@@ -14,7 +14,8 @@ class DmozItem(scrapy.Item):
 	Compensation = scrapy.Field()
 	Employment_type = scrapy.Field()
 	Link = scrapy.Field()
-
+	Email = scrapy.Field()
+	Phone = scrapy.Field()
 class DmozSpider(scrapy.Spider):
 	name = "craig"
 	page_numbers = 120
@@ -84,12 +85,16 @@ class DmozSpider(scrapy.Spider):
 		Description[5] = ""
 		
 		for sub in Description: 
-			res.append(re.sub('\n', '', sub))
+			res.append(re.sub('\n', ' ', sub))
 		print(res)
 		text_list=""
 		for text in res:
-			text = text.replace(",","")
+			text = text.replace(","," ")
 			text_list = text_list+text
+		lst = re.findall('\S+@\S+', text_list)
+		phn = re.findall(r'[\+\(]?[1-9][0-9 .\-\(\)]{8,}[0-9]', text_list)
+
+		item['Email'] = lst
 		item['Title'] = Title
 		item['Location'] = Address
 		item['Compensation'] = Compensation
@@ -97,5 +102,6 @@ class DmozSpider(scrapy.Spider):
 		item['Address'] = Location
 		item['Description'] = text_list
 		item['Link'] = Link
+		item['Phone'] = phn
 		return item
 	
