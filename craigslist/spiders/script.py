@@ -20,16 +20,20 @@ class DmozSpider(scrapy.Spider):
 	name = "craig"
 	page_numbers = 120
 	start_urls = [
-	'https://minneapolis.craigslist.org/d/services/search/bbb'
+	'https://bismarck.craigslist.org/search/bbb'
 	]
 	def parse(self, response):
 		links = response.css('a.result-title').xpath("@href").extract()
-		for link in links:
-			yield scrapy.Request(link, callback=self.parse_attr)
+		dp = []
+		for i in links:
+			if "https://bismarck.craigslist.org" in i:
+				dp.append(i)
+		for link in dp:
+			yield scrapy.Request(url=link, callback=self.parse_attr)
 		next_page = response.css('a.button.next').xpath("@href").extract()
 		if next_page:
 			next_href = next_page[0]
-			next_page_url = 'https://minneapolis.craigslist.org' + next_href
+			next_page_url = 'https://bismarck.craigslist.org' + next_href
 			request = scrapy.Request(url=next_page_url)
 			yield request
 
@@ -54,14 +58,18 @@ class DmozSpider(scrapy.Spider):
 		# 	Email = ""
 		# if "@" in Name:
 		# 	Name=""	
+		
 		item = DmozItem()
 		Link = response.url
 		Title = response.css('h1 span span::text').extract()
 		Location = response.css('h1 span small::text').extract()
 		
 		ll = response.css('p span b::text').extract()
+		
 		if not ll:
-			return
+			ll = ll
+			Compensation=""
+			Employment_type=""
 		else:
 			Compensation = ll[0]
 			try:
@@ -69,6 +77,7 @@ class DmozSpider(scrapy.Spider):
 			except IndexError:
 				Employment_type = ""
 		Address = response.css('div.mapaddress::text').extract()
+		
 		try:
 			Location[0] = Location[0].replace(" (","")
 			Location[0] = Location[0].replace(")","")
@@ -93,7 +102,6 @@ class DmozSpider(scrapy.Spider):
 			text_list = text_list+text
 		lst = re.findall('\S+@\S+', text_list)
 		phn = re.findall(r'[\+\(]?[1-9][0-9 .\-\(\)]{8,}[0-9]', text_list)
-
 		item['Email'] = lst
 		item['Title'] = Title
 		item['Location'] = Address
@@ -103,5 +111,6 @@ class DmozSpider(scrapy.Spider):
 		item['Description'] = text_list
 		item['Link'] = Link
 		item['Phone'] = phn
+
 		return item
 	
